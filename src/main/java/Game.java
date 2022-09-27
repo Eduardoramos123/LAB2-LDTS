@@ -1,5 +1,4 @@
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextCharacter;
+import com.googlecode.lanterna.*;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
@@ -39,6 +38,8 @@ public class Game {
                     break;
                 }
                 if (arena.processKey(key)) {
+                    draw_lost();
+                    Thread.sleep(4000);
                     screen.close();
                     break;
                 }
@@ -46,7 +47,7 @@ public class Game {
 
 
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -55,6 +56,21 @@ public class Game {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
         arena.draw(graphics);
+        screen.refresh();
+    }
+
+    private void draw_lost() throws IOException {
+        screen.clear();
+        TextGraphics graphics = screen.newTextGraphics();
+        graphics.setForegroundColor(TextColor.Factory.fromString("#FFFF33"));
+
+        graphics.setBackgroundColor(TextColor.Factory.fromString("#000000"));
+        graphics.fillRectangle(new TerminalPosition(0, 0), new TerminalSize(39 + 2, 19 + 2), ' ');
+
+        graphics.setForegroundColor(TextColor.Factory.fromString("#8B0000"));
+        graphics.enableModifiers(SGR.BOLD);
+        graphics.putString(new TerminalPosition(15, 10), "You Died");
+
         screen.refresh();
     }
 

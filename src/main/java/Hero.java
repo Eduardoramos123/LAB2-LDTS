@@ -7,9 +7,13 @@ import com.googlecode.lanterna.screen.Screen;
 
 public class Hero extends Element{
     Position position;
+    private int energy;
+    private int score;
 
-    public Hero(int x, int y) {
+    public Hero(int x, int y, int energy, int score) {
         position = new Position(x, y);
+        this.energy = energy;
+        this.score = score;
     }
 
     public Position moveUp() {
@@ -27,6 +31,23 @@ public class Hero extends Element{
 
     public void setPosition(Position position) {
         this.position = position;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+    public int getEnergy() {
+        return energy;
+    }
+    public void decrementEnergy() {
+        energy = energy - 1;
+    }
+
+    public void incrementScore() {
+        score = score + 1;
+    }
+    public int getScore() {
+        return score;
     }
 
     public void draw(TextGraphics graphics) {

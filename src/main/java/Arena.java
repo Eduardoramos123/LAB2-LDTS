@@ -1,3 +1,4 @@
+import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
@@ -14,7 +15,7 @@ public class Arena {
 
     int width;
     int height;
-    private Hero hero = new Hero(10, 10);
+    private Hero hero = new Hero(10, 10, 5, 0);
     private Monster monster = new Monster(15, 15);
     private List<Wall> walls;
     private List<Coin> coins;
@@ -69,6 +70,7 @@ public class Arena {
         for (Coin coin: coins) {
             if (coin.getPosition().equals(position)) {
                 retrieveCoins(position);
+                hero.incrementScore();
             }
         }
 
@@ -108,38 +110,82 @@ public class Arena {
 
     public boolean processKey(KeyStroke key) {
         if (key.getKeyType() == KeyType.ArrowUp) {
-            moveHero(hero.moveUp());
-            moveMonster(monster.move(hero.moveUp()));
-            if (verifyMonsterCollisions(hero.moveUp(), monster.move(hero.moveUp()))) {
-                System.out.println("You lost!!");
-                return true;
+            Position new_hero = hero.moveUp();
+            moveHero(new_hero);
+            if (canHeroMove(new_hero)) {
+                moveMonster(monster.move(new_hero));
+            }
+            else {
+                moveMonster(monster.move(hero.position));
+            }
+            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
+                hero.decrementEnergy();
+                if (hero.getEnergy() == 0) {
+                    System.out.println("You lost!!");
+                    return true;
+                }
+                System.out.println("Ouchhh!");
+                return false;
             }
             return false;
         }
         else if (key.getKeyType() == KeyType.ArrowDown) {
-            moveHero(hero.moveDown());
-            moveMonster(monster.move(hero.moveDown()));
-            if (verifyMonsterCollisions(hero.moveDown(), monster.move(hero.moveDown()))) {
-                System.out.println("You lost!!");
-                return true;
+            Position new_hero = hero.moveDown();
+            moveHero(new_hero);
+            if (canHeroMove(new_hero)) {
+                moveMonster(monster.move(new_hero));
+            }
+            else {
+                moveMonster(monster.move(hero.position));
+            }
+            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
+                hero.decrementEnergy();
+                if (hero.getEnergy() == 0) {
+                    System.out.println("You lost!!");
+                    return true;
+                }
+                System.out.println("Ouchhh!");
+                return false;
             }
             return false;
         }
         else if (key.getKeyType() == KeyType.ArrowLeft) {
-            moveHero(hero.moveLeft());
-            moveMonster(monster.move(hero.moveLeft()));
-            if (verifyMonsterCollisions(hero.moveLeft(), monster.move(hero.moveLeft()))) {
-                System.out.println("You lost!!");
-                return true;
+            Position new_hero = hero.moveLeft();
+            moveHero(new_hero);
+            if (canHeroMove(new_hero)) {
+                moveMonster(monster.move(new_hero));
+            }
+            else {
+                moveMonster(monster.move(hero.position));
+            }
+            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
+                hero.decrementEnergy();
+                if (hero.getEnergy() == 0) {
+                    System.out.println("You lost!!");
+                    return true;
+                }
+                System.out.println("Ouchhh!");
+                return false;
             }
             return false;
         }
         else if (key.getKeyType() == KeyType.ArrowRight) {
-            moveHero(hero.moveRight());
-            moveMonster(monster.move(hero.moveRight()));
-            if (verifyMonsterCollisions(hero.moveRight(), monster.move(hero.moveRight()))) {
-                System.out.println("You lost!!");
-                return true;
+            Position new_hero = hero.moveRight();
+            moveHero(new_hero);
+            if (canHeroMove(new_hero)) {
+                moveMonster(monster.move(new_hero));
+            }
+            else {
+                moveMonster(monster.move(hero.position));
+            }
+            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
+                hero.decrementEnergy();
+                if (hero.getEnergy() == 0) {
+                    System.out.println("You lost!!");
+                    return true;
+                }
+                System.out.println("Ouchhh!");
+                return false;
             }
             return false;
         }
@@ -161,6 +207,30 @@ public class Arena {
         for (Coin coin : coins) {
             coin.draw(graphics);
         }
+
+        //Score
+
+        graphics.setForegroundColor(TextColor.Factory.fromString("#FFFF33"));
+        graphics.enableModifiers(SGR.BOLD);
+        graphics.putString(new TerminalPosition(0, 0), "Score: " + hero.getScore() + " ");
+
+        //Energy
+        if (hero.getEnergy() > 3) {
+            graphics.setForegroundColor(TextColor.Factory.fromString("#00FF00"));
+            graphics.enableModifiers(SGR.BOLD);
+            graphics.putString(new TerminalPosition(0, 19), "Energy: " + hero.getEnergy() + " ");
+        }
+        else if (hero.getEnergy() <= 3 && hero.getEnergy() > 1) {
+            graphics.setForegroundColor(TextColor.Factory.fromString("#EC9B00"));
+            graphics.enableModifiers(SGR.BOLD);
+            graphics.putString(new TerminalPosition(0, 19), "Energy: " + hero.getEnergy() + " ");
+        }
+        else {
+            graphics.setForegroundColor(TextColor.Factory.fromString("#EC0000"));
+            graphics.enableModifiers(SGR.BOLD);
+            graphics.putString(new TerminalPosition(0, 19), "Energy: " + hero.getEnergy() + " ");
+        }
+
 
     }
 }
