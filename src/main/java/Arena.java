@@ -16,17 +16,27 @@ public class Arena {
     int width;
     int height;
     private Hero hero = new Hero(10, 10, 5, 0);
-    private Monster monster = new Monster(15, 15);
     //private HazardX hazard = new HazardX(2,2, 1);
-    private HazardY hazard = new HazardY(2,2, 1);
     private List<Wall> walls;
     private List<Coin> coins;
+    private List<Element> monsters = new ArrayList<>();
+    private List<Gate> gates = new ArrayList<>();
 
     public Arena(int width, int height) {
         this.width = width;
         this.height = height;
         this.walls = createWalls();
         this.coins = createCoins();
+    }
+
+    public Arena(int width, int height, List<Wall> walls, Hero hero, List<Element> monsters, List<Coin> coins, List<Gate> gates) {
+        this.width = width;
+        this.height = height;
+        this.walls = walls;
+        this.hero = hero;
+        this.monsters = monsters;
+        this.coins = coins;
+        this.gates = gates;
     }
 
     private List<Wall> createWalls() {
@@ -39,6 +49,12 @@ public class Arena {
             walls.add(new Wall(0, r));
             walls.add(new Wall(width, r));
         }
+
+        for (int i = 1; i < 10; i++) {
+            walls.add(new Wall(i, 6));
+        }
+
+
         return walls;
     }
 
@@ -69,10 +85,47 @@ public class Arena {
             }
         }
 
+        for (Gate gate: gates) {
+            if (gate.getPosition().equals(position) && gate.lock) {
+                return false;
+            }
+        }
+
         for (Coin coin: coins) {
             if (coin.getPosition().equals(position)) {
                 retrieveCoins(position);
                 hero.incrementScore();
+            }
+        }
+
+        if (height < position.getY()) {
+            return false;
+        }
+        if (position.getY() < 0) {
+            return false;
+        }
+
+        if (width < position.getX()) {
+            return false;
+        }
+        if (position.getX() < 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean canHeroMoveModified(Position position) {
+
+        for (Wall wall: walls) {
+            if (wall.getPosition().equals(position)) {
+                return false;
+            }
+        }
+
+        for (Gate gate: gates) {
+            if (gate.getPosition().equals(position)) {
+                return false;
             }
         }
 
@@ -99,11 +152,11 @@ public class Arena {
         }
     }
 
-    private void moveMonster(Position position) {
-        monster.setPosition(position);
+    private void moveMonster(Position position, Monster mon) {
+        mon.setPosition(position);
     }
-    private void moveHazard(Position position) {
-        hazard.setPosition(position);
+    private void moveHazard(Position position, Element haz) {
+        haz.setPosition(position);
     }
 
     private boolean verifyMonsterCollisions(Position hero_pos, Position most_pos) {
@@ -113,168 +166,165 @@ public class Arena {
         return false;
     }
 
-    public boolean processKey(KeyStroke key) {
+    boolean moveProtocolMonster(Position position) {
+        for (Element mon : monsters) {
+            if (mon instanceof HazardX) {
+                HazardX hax = (HazardX) mon;
+                Position hazard_pos = hax.move();
+
+                if (!canHeroMoveModified(hazard_pos)) {
+                    hax.switchDirection();
+                    moveHazard(hax.move(), hax);
+                }
+                else {
+                    moveHazard(hazard_pos, hax);
+                }
+
+                if (verifyMonsterCollisions(position, hax.position)) {
+                    hero.decrementEnergy();
+                    if (hero.getEnergy() == 0) {
+                        System.out.println("You lost!!");
+                        return true;
+                    }
+                    System.out.println("Ouchhh!");
+                    return false;
+                }
+            }
+            else if (mon instanceof HazardY) {
+                HazardY hax = (HazardY) mon;
+                Position hazard_pos = hax.move();
+
+                if (!canHeroMoveModified(hazard_pos)) {
+                    hax.switchDirection();
+                    moveHazard(hax.move(), hax);
+                }
+                else {
+                    moveHazard(hazard_pos, hax);
+                }
+
+                if (verifyMonsterCollisions(position, hax.position)) {
+                    hero.decrementEnergy();
+                    if (hero.getEnergy() == 0) {
+                        System.out.println("You lost!!");
+                        return true;
+                    }
+                    System.out.println("Ouchhh!");
+                    return false;
+                }
+            }
+            else if (mon instanceof Monster) {
+                Monster m = (Monster) mon;
+                if (canHeroMove(position)) {
+                    moveMonster(m.move(position), m);
+                }
+                else {
+                    moveMonster(m.move(hero.position), m);
+                }
+                if (verifyMonsterCollisions(position, m.move(position))) {
+                    hero.decrementEnergy();
+                    if (hero.getEnergy() == 0) {
+                        System.out.println("You lost!!");
+                        return true;
+                    }
+                    System.out.println("Ouchhh!");
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean heroInGate(Position position) {
+        for (Gate gate: gates) {
+            if (gate.getPosition().equals(position) && !gate.lock) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int processKey(KeyStroke key) {
         if (key.getKeyType() == KeyType.ArrowUp) {
             Position new_hero = hero.moveUp();
             moveHero(new_hero);
 
-            Position hazard_pos = hazard.move();
-
-            if (!canHeroMove(hazard_pos)) {
-                hazard.switchDirection();
-                moveHazard(hazard.move());
-            }
-            else {
-                moveHazard(hazard_pos);
+            if (moveProtocolMonster(hero.position)) {
+                return -1;
             }
 
-            if (canHeroMove(new_hero)) {
-                moveMonster(monster.move(new_hero));
-            }
-            else {
-                moveMonster(monster.move(hero.position));
-            }
-            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
+            if (coins.isEmpty()) {
+                for (Gate gate : gates) {
+                    gate.unlock();
                 }
-                System.out.println("Ouchhh!");
-                return false;
             }
-            if (verifyMonsterCollisions(new_hero, hazard.position)) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
-                }
-                System.out.println("Ouchhh!");
-                return false;
+
+            if (heroInGate(hero.position)) {
+                return gates.get(0).level;
             }
-            return false;
+
+            return 0;
         }
         else if (key.getKeyType() == KeyType.ArrowDown) {
             Position new_hero = hero.moveDown();
             moveHero(new_hero);
 
-            Position hazard_pos = hazard.move();
-
-            if (!canHeroMove(hazard_pos)) {
-                hazard.switchDirection();
-                moveHazard(hazard.move());
-            }
-            else {
-                moveHazard(hazard_pos);
+            if (moveProtocolMonster(hero.position)) {
+                return -1;
             }
 
-            if (canHeroMove(new_hero)) {
-                moveMonster(monster.move(new_hero));
-            }
-            else {
-                moveMonster(monster.move(hero.position));
-            }
-            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
+            if (coins.isEmpty()) {
+                for (Gate gate : gates) {
+                    gate.unlock();
                 }
-                System.out.println("Ouchhh!");
-                return false;
             }
-            if (verifyMonsterCollisions(new_hero, hazard.position)) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
-                }
-                System.out.println("Ouchhh!");
-                return false;
+
+            if (heroInGate(hero.position)) {
+                return gates.get(0).level;
             }
-            return false;
+
+            return 0;
         }
         else if (key.getKeyType() == KeyType.ArrowLeft) {
             Position new_hero = hero.moveLeft();
             moveHero(new_hero);
 
-            Position hazard_pos = hazard.move();
-
-            if (!canHeroMove(hazard_pos)) {
-                hazard.switchDirection();
-                moveHazard(hazard.move());
-            }
-            else {
-                moveHazard(hazard_pos);
+            if (moveProtocolMonster(hero.position)) {
+                return -1;
             }
 
-            if (canHeroMove(new_hero)) {
-                moveMonster(monster.move(new_hero));
-            }
-            else {
-                moveMonster(monster.move(hero.position));
-            }
-            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
+            if (coins.isEmpty()) {
+                for (Gate gate : gates) {
+                    gate.unlock();
                 }
-                System.out.println("Ouchhh!");
-                return false;
             }
-            if (verifyMonsterCollisions(new_hero, hazard.position)) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
-                }
-                System.out.println("Ouchhh!");
-                return false;
+
+            if (heroInGate(hero.position)) {
+                return gates.get(0).level;
             }
-            return false;
+
+            return 0;
         }
         else if (key.getKeyType() == KeyType.ArrowRight) {
             Position new_hero = hero.moveRight();
             moveHero(new_hero);
 
-            Position hazard_pos = hazard.move();
-
-            if (!canHeroMove(hazard_pos)) {
-                hazard.switchDirection();
-                moveHazard(hazard.move());
-            }
-            else {
-                moveHazard(hazard_pos);
+            if (moveProtocolMonster(hero.position)) {
+                return -1;
             }
 
-            if (canHeroMove(new_hero)) {
-                moveMonster(monster.move(new_hero));
-            }
-            else {
-                moveMonster(monster.move(hero.position));
-            }
-            if (verifyMonsterCollisions(new_hero, monster.move(new_hero))) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
+            if (coins.isEmpty()) {
+                for (Gate gate : gates) {
+                    gate.unlock();
                 }
-                System.out.println("Ouchhh!");
-                return false;
             }
-            if (verifyMonsterCollisions(new_hero, hazard.position)) {
-                hero.decrementEnergy();
-                if (hero.getEnergy() == 0) {
-                    System.out.println("You lost!!");
-                    return true;
-                }
-                System.out.println("Ouchhh!");
-                return false;
+
+            if (heroInGate(hero.position)) {
+                return gates.get(0).level;
             }
-            return false;
+
+            return 0;
         }
-        return false;
+        return 0;
     }
 
     public void draw(TextGraphics graphics) {
@@ -283,8 +333,9 @@ public class Arena {
 
         hero.draw(graphics);
 
-        monster.draw(graphics);
-        hazard.draw(graphics);
+        for (Element m : monsters) {
+            m.draw(graphics);
+        }
 
         for (Wall wall : walls) {
             wall.draw(graphics);
@@ -292,6 +343,10 @@ public class Arena {
 
         for (Coin coin : coins) {
             coin.draw(graphics);
+        }
+
+        for (Gate gate : gates) {
+            gate.draw(graphics);
         }
 
         //Score
