@@ -22,6 +22,8 @@ public class Game {
     String path1 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level1.txt";
     String path2 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level2.txt";
     String path3 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level3.txt";
+    String path4 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level4.txt";
+    String path5 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level5.txt";
 
 
     private void getLevelFromFile(String path) throws IOException {
@@ -97,6 +99,12 @@ public class Game {
         else if (i == 3) {
             getLevelFromFile(path3);
         }
+        else if (i == 4) {
+            getLevelFromFile(path4);
+        }
+        else if (i == 5) {
+            getLevelFromFile(path5);
+        }
 
 
         try {
@@ -161,6 +169,21 @@ public class Game {
         graphics.setForegroundColor(TextColor.Factory.fromString("#8B0000"));
         graphics.enableModifiers(SGR.BOLD);
         graphics.putString(new TerminalPosition(15, 10), "You Died");
+
+        screen.refresh();
+    }
+
+    private void draw_win() throws IOException {
+        screen.clear();
+        TextGraphics graphics = screen.newTextGraphics();
+        graphics.setForegroundColor(TextColor.Factory.fromString("#FFFF33"));
+
+        graphics.setBackgroundColor(TextColor.Factory.fromString("#000000"));
+        graphics.fillRectangle(new TerminalPosition(0, 0), new TerminalSize(39 + 2, 19 + 2), ' ');
+
+        graphics.setForegroundColor(TextColor.Factory.fromString("#8B0000"));
+        graphics.enableModifiers(SGR.BOLD);
+        graphics.putString(new TerminalPosition(15, 10), "You Won!");
 
         screen.refresh();
     }

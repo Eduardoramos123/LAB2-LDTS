@@ -129,20 +129,6 @@ public class Arena {
             }
         }
 
-        if (height < position.getY()) {
-            return false;
-        }
-        if (position.getY() < 0) {
-            return false;
-        }
-
-        if (width < position.getX()) {
-            return false;
-        }
-        if (position.getX() < 0) {
-            return false;
-        }
-
         return true;
     }
 
@@ -174,10 +160,10 @@ public class Arena {
 
                 if (!canHeroMoveModified(hazard_pos)) {
                     hax.switchDirection();
-                    moveHazard(hax.move(), hax);
+                    moveHazard(hax.move(), mon);
                 }
                 else {
-                    moveHazard(hazard_pos, hax);
+                    moveHazard(hazard_pos, mon);
                 }
 
                 if (verifyMonsterCollisions(position, hax.position)) {
@@ -187,7 +173,6 @@ public class Arena {
                         return true;
                     }
                     System.out.println("Ouchhh!");
-                    return false;
                 }
             }
             else if (mon instanceof HazardY) {
@@ -209,7 +194,6 @@ public class Arena {
                         return true;
                     }
                     System.out.println("Ouchhh!");
-                    return false;
                 }
             }
             else if (mon instanceof Monster) {
@@ -227,7 +211,6 @@ public class Arena {
                         return true;
                     }
                     System.out.println("Ouchhh!");
-                    return false;
                 }
             }
         }
