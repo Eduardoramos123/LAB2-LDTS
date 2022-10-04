@@ -19,11 +19,14 @@ public class Game {
     public static Terminal terminal;
     public static Screen screen;
     public static Arena arena = new Arena(39, 19);
+    public int energy = 5;
+    public int score = 0;
     String path1 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level1.txt";
     String path2 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level2.txt";
     String path3 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level3.txt";
     String path4 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level4.txt";
     String path5 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level5.txt";
+    String path6 = "C:\\Users\\Eduardo\\Desktop\\LDTS\\LAB2\\Level6.txt";
 
 
     private void getLevelFromFile(String path) throws IOException {
@@ -41,7 +44,7 @@ public class Game {
         List<Element> monsters = new ArrayList<>();
         List<Coin> coins = new ArrayList<>();
         List<Gate> gates= new ArrayList<>();
-
+        List<Sword> swords = new ArrayList<>();
 
         Hero hero = null;
 
@@ -61,7 +64,7 @@ public class Game {
                         walls.add(new Wall(j, height_aco));
                     }
                     else if (st.charAt(j) == 'X') {
-                        hero = new Hero(j, height_aco, 5, 0);
+                        hero = new Hero(j, height_aco, energy, score);
                     }
                     else if (st.charAt(j) == 'M') {
                         monsters.add(new Monster(j, height_aco));
@@ -78,12 +81,15 @@ public class Game {
                     else if (st.charAt(j) == 'G') {
                         gates.add(new Gate(j, height_aco, level));
                     }
+                    else if (st.charAt(j) == 'S') {
+                        swords.add(new Sword(j, height_aco));
+                    }
                 }
                 height_aco = height_aco + 1;
             }
             i++;
         }
-        arena = new Arena(width, height, walls, hero, monsters, coins, gates);
+        arena = new Arena(width, height, walls, hero, monsters, coins, gates, swords);
     }
 
 
@@ -104,6 +110,9 @@ public class Game {
         }
         else if (i == 5) {
             getLevelFromFile(path5);
+        }
+        else if (i == 6) {
+            getLevelFromFile(path6);
         }
 
 
@@ -136,8 +145,16 @@ public class Game {
                     screen.close();
                     break;
                 }
+                if (check == -2) {
+                    draw_win();
+                    Thread.sleep(4000);
+                    screen.close();
+                    break;
+                }
                 else if (check != 0) {
                     screen.close();
+                    energy = arena.getEnergy();
+                    score = arena.getScore();
                     run(check);
                     return;
                 }
@@ -178,10 +195,10 @@ public class Game {
         TextGraphics graphics = screen.newTextGraphics();
         graphics.setForegroundColor(TextColor.Factory.fromString("#FFFF33"));
 
-        graphics.setBackgroundColor(TextColor.Factory.fromString("#000000"));
+        graphics.setBackgroundColor(TextColor.Factory.fromString("#FFFFFF"));
         graphics.fillRectangle(new TerminalPosition(0, 0), new TerminalSize(39 + 2, 19 + 2), ' ');
 
-        graphics.setForegroundColor(TextColor.Factory.fromString("#8B0000"));
+        graphics.setForegroundColor(TextColor.Factory.fromString("#40E0D0"));
         graphics.enableModifiers(SGR.BOLD);
         graphics.putString(new TerminalPosition(15, 10), "You Won!");
 

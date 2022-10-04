@@ -21,6 +21,8 @@ public class Arena {
     private List<Coin> coins;
     private List<Element> monsters = new ArrayList<>();
     private List<Gate> gates = new ArrayList<>();
+    private List<Sword> swords = new ArrayList<>();
+
 
     public Arena(int width, int height) {
         this.width = width;
@@ -29,7 +31,7 @@ public class Arena {
         this.coins = createCoins();
     }
 
-    public Arena(int width, int height, List<Wall> walls, Hero hero, List<Element> monsters, List<Coin> coins, List<Gate> gates) {
+    public Arena(int width, int height, List<Wall> walls, Hero hero, List<Element> monsters, List<Coin> coins, List<Gate> gates, List<Sword> swords) {
         this.width = width;
         this.height = height;
         this.walls = walls;
@@ -37,6 +39,7 @@ public class Arena {
         this.monsters = monsters;
         this.coins = coins;
         this.gates = gates;
+        this.swords = swords;
     }
 
     private List<Wall> createWalls() {
@@ -226,6 +229,15 @@ public class Arena {
         return false;
     }
 
+    private boolean heroInSword(Position position) {
+        for (Sword sword: swords) {
+            if (sword.getPosition().equals(position)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int processKey(KeyStroke key) {
         if (key.getKeyType() == KeyType.ArrowUp) {
             Position new_hero = hero.moveUp();
@@ -243,6 +255,10 @@ public class Arena {
 
             if (heroInGate(hero.position)) {
                 return gates.get(0).level;
+            }
+
+            if (heroInSword(hero.position)) {
+                return -2;
             }
 
             return 0;
@@ -265,6 +281,10 @@ public class Arena {
                 return gates.get(0).level;
             }
 
+            if (heroInSword(hero.position)) {
+                return -2;
+            }
+
             return 0;
         }
         else if (key.getKeyType() == KeyType.ArrowLeft) {
@@ -283,6 +303,10 @@ public class Arena {
 
             if (heroInGate(hero.position)) {
                 return gates.get(0).level;
+            }
+
+            if (heroInSword(hero.position)) {
+                return -2;
             }
 
             return 0;
@@ -305,9 +329,21 @@ public class Arena {
                 return gates.get(0).level;
             }
 
+            if (heroInSword(hero.position)) {
+                return -2;
+            }
+
             return 0;
         }
         return 0;
+    }
+
+    public int getEnergy() {
+        return hero.getEnergy();
+    }
+
+    public int getScore() {
+        return hero.getScore();
     }
 
     public void draw(TextGraphics graphics) {
@@ -330,6 +366,10 @@ public class Arena {
 
         for (Gate gate : gates) {
             gate.draw(graphics);
+        }
+
+        for (Sword sword : swords) {
+            sword.draw(graphics);
         }
 
         //Score
