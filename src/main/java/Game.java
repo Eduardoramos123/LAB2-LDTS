@@ -117,9 +117,6 @@ public class Game {
                 break;
         }
 
-
-
-
         try {
             TerminalSize terminalSize = new TerminalSize(40, 20);
             DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory().setInitialTerminalSize(terminalSize);
