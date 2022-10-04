@@ -96,25 +96,26 @@ public class Game {
 
     public void run(int i) throws IOException {
 
-        if (i == 1) {
-            getLevelFromFile(path1);
+        switch (i) {
+            case 1:
+                getLevelFromFile(path1);
+                break;
+            case 2:
+                getLevelFromFile(path2);
+                break;
+            case 3:
+                getLevelFromFile(path3);
+                break;
+            case 4:
+                getLevelFromFile(path4);
+                break;
+            case 5:
+                getLevelFromFile(path5);
+                break;
+            case 6:
+                getLevelFromFile(path6);
+                break;
         }
-        else if (i == 2) {
-            getLevelFromFile(path2);
-        }
-        else if (i == 3) {
-            getLevelFromFile(path3);
-        }
-        else if (i == 4) {
-            getLevelFromFile(path4);
-        }
-        else if (i == 5) {
-            getLevelFromFile(path5);
-        }
-        else if (i == 6) {
-            getLevelFromFile(path6);
-        }
-
 
         try {
             TerminalSize terminalSize = new TerminalSize(40, 20);

@@ -374,7 +374,7 @@ public class Arena {
 
         //Score
 
-        graphics.setForegroundColor(TextColor.Factory.fromString("#FFFF33"));
+        graphics.setForegroundColor(TextColor.Factory.fromString("#FFA500"));
         graphics.enableModifiers(SGR.BOLD);
         graphics.putString(new TerminalPosition(0, 0), "Score: " + hero.getScore() + " ");
 
