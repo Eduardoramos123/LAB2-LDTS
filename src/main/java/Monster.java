@@ -21,13 +21,16 @@ public class Monster extends Element{
         if (hero_position.getX() < position.getX()) {
             return new Position(position.getX() - 1, position.getY());
         }
-        else if (hero_position.getX() > position.getX()) {
+
+        if (hero_position.getX() > position.getX()) {
             return new Position(position.getX() + 1, position.getY());
         }
-        else if (hero_position.getY() < position.getY()) {
+
+        if (hero_position.getY() < position.getY()) {
             return new Position(position.getX(), position.getY() - 1);
         }
-        else if (hero_position.getY() > position.getY()) {
+
+        if (hero_position.getY() > position.getY()) {
             return new Position(position.getX(), position.getY() + 1);
         }
         return new Position(position.getX(), position.getY());
